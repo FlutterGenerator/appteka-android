@@ -36,6 +36,15 @@ jobs:
           -PkeyPassword=${{ secrets.KEY_PASSWORD }} \
           --warning-mode all
 
+      - name: Set APK path
+        id: setpath
+        run: |
+          if [ "${{ matrix.build_type }}" = "Debug" ]; then
+            echo "APK_PATH=app/build/outputs/apk/debug/app-debug.apk" >> $GITHUB_ENV
+          else
+            echo "APK_PATH=app/build/outputs/apk/release/app-release.apk" >> $GITHUB_ENV
+          fi
+
       - name: Upload Gradle Problem Report
         uses: actions/upload-artifact@v5
         with:
@@ -47,4 +56,5 @@ jobs:
         uses: actions/upload-artifact@v5
         with:
           name: appteka-apk-${{ matrix.build_type }}-${{ github.run_id }}
-          path: app/build/outputs/apk/${{ matrix.build_type | toLowerCase }}/app-${{ matrix.build_type | toLowerCase }}.apk
+          path: ${{ env.APK_PATH }}
+          if-no-files-found: error
