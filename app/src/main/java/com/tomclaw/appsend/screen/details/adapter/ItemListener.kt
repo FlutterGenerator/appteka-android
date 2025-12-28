@@ -1,5 +1,6 @@
 package com.tomclaw.appsend.screen.details.adapter
 
+import com.tomclaw.appsend.screen.details.adapter.play.PlaySecurityStatus
 import com.tomclaw.appsend.screen.details.adapter.screenshot.ScreenshotItem
 import com.tomclaw.appsend.screen.details.adapter.status.StatusAction
 
@@ -32,5 +33,9 @@ interface ItemListener {
     fun onStatusAction(type: StatusAction)
 
     fun onScreenshotClick(items: List<ScreenshotItem>, clicked: Int)
+
+    fun onRequestSecurityScan(appId: String)
+
+    fun onSecurityInfoClick(status: PlaySecurityStatus, score: Int?)
 
 }

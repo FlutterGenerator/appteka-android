@@ -2,7 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
 
     <ScrollView
         android:id="@+id/root_view"
@@ -26,7 +27,8 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="20dp"
                 android:layout_marginBottom="8dp"
-                android:src="@drawable/ic_email" />
+                android:src="@drawable/request_code"
+                app:tint="?attr/text_secondary_color" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -50,7 +52,7 @@
                 android:textSize="16sp" />
 
             <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                style="@style/MaterialTextInputExpressive"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingBottom="8dp">
@@ -72,7 +74,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:text="@string/send_verification_code"
-                app:cornerRadius="99dp" />
+                />
 
         </LinearLayout>
 

@@ -8,12 +8,14 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.avito.konveyor.adapter.SimpleRecyclerAdapter
-import com.github.rubensousa.bottomsheetbuilder.BottomSheetBuilder
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.snackbar.Snackbar
 import com.jakewharton.rxrelay3.PublishRelay
 import com.tomclaw.appsend.R
-import com.tomclaw.appsend.util.getAttributedColor
+import com.tomclaw.appsend.util.ActionItem
+import com.tomclaw.appsend.util.ActionsAdapter
 import com.tomclaw.appsend.util.hideWithAlphaAnimation
 import com.tomclaw.appsend.util.showWithAlphaAnimation
 import io.reactivex.rxjava3.core.Observable
@@ -34,9 +36,17 @@ interface TopicsView {
 
     fun showUnauthorizedError()
 
+    fun stopPullRefreshing()
+
+    fun isPullRefreshing(): Boolean
+
+    fun scrollToTop()
+
     fun getStartedClicks(): Observable<Unit>
 
     fun retryButtonClicks(): Observable<Unit>
+
+    fun refreshClicks(): Observable<Unit>
 
     fun pinTopicClicks(): Observable<Int>
 
@@ -56,6 +66,7 @@ class TopicsViewImpl(
 
     private val context = view.context
     private val coordinator: CoordinatorLayout = view.findViewById(R.id.coordinator)
+    private val refresher: SwipeRefreshLayout = view.findViewById(R.id.swipe_refresh)
     private val viewFlipper: ViewFlipper = view.findViewById(R.id.view_flipper)
     private val overlayProgress: View = view.findViewById(R.id.overlay_progress)
     private val getStartedButton: View = view.findViewById(R.id.get_started_button)
@@ -65,6 +76,7 @@ class TopicsViewImpl(
 
     private val getStartedRelay = PublishRelay.create<Unit>()
     private val retryButtonRelay = PublishRelay.create<Unit>()
+    private val refreshRelay = PublishRelay.create<Unit>()
     private val pinTopicRelay = PublishRelay.create<Int>()
     private val loginRelay = PublishRelay.create<Unit>()
 
@@ -80,50 +92,65 @@ class TopicsViewImpl(
         getStartedButton.setOnClickListener { getStartedRelay.accept(Unit) }
         retryButton.setOnClickListener { retryButtonRelay.accept(Unit) }
         errorText.setText(R.string.topics_loading_failed)
+
+        refresher.setOnRefreshListener { refreshRelay.accept(Unit) }
     }
 
     override fun showIntro() {
+        refresher.isEnabled = false
         viewFlipper.displayedChild = 0
     }
 
     override fun showProgress() {
+        refresher.isEnabled = false
         viewFlipper.displayedChild = 1
         overlayProgress.showWithAlphaAnimation(animateFully = true)
     }
 
     override fun showContent() {
+        refresher.isEnabled = true
         viewFlipper.displayedChild = 1
         overlayProgress.hideWithAlphaAnimation(animateFully = false)
     }
 
     override fun showError() {
+        refresher.isEnabled = true
         viewFlipper.displayedChild = 2
     }
 
+    override fun stopPullRefreshing() {
+        refresher.isRefreshing = false
+    }
+
+    override fun isPullRefreshing(): Boolean = refresher.isRefreshing
+
+    override fun scrollToTop() {
+        recycler.scrollToPosition(0)
+    }
+
     override fun showMessageDialog(topicId: Int, isPinned: Boolean) {
-        val theme = R.style.BottomSheetDialogDark.takeIf { preferences.isDarkTheme() }
-            ?: R.style.BottomSheetDialogLight
-        BottomSheetBuilder(view.context, theme)
-            .setMode(BottomSheetBuilder.MODE_LIST)
-            .setIconTintColor(getAttributedColor(context, R.attr.menu_icons_tint))
-            .setItemTextColor(getAttributedColor(context, R.attr.text_primary_color))
-            .apply {
-                if (isPinned) {
-                    addItem(
-                        MENU_PIN,
-                        R.string.unpin,
-                        R.drawable.ic_pin_off
-                    ).setItemClickListener { pinTopicRelay.accept(topicId) }
-                } else {
-                    addItem(
-                        MENU_PIN,
-                        R.string.pin,
-                        R.drawable.ic_pin
-                    ).setItemClickListener { pinTopicRelay.accept(topicId) }
-                }
+        val bottomSheetDialog = BottomSheetDialog(context)
+        val sheetView = View.inflate(context, R.layout.bottom_sheet_actions, null)
+        val actionsRecycler: RecyclerView = sheetView.findViewById(R.id.actions_recycler)
+
+        val actions = if (isPinned) {
+            listOf(ActionItem(MENU_PIN, context.getString(R.string.unpin), R.drawable.ic_pin_off))
+        } else {
+            listOf(ActionItem(MENU_PIN, context.getString(R.string.pin), R.drawable.ic_pin))
+        }
+
+        val actionsAdapter = ActionsAdapter(actions) { actionId ->
+            bottomSheetDialog.dismiss()
+            if (actionId == MENU_PIN) {
+                pinTopicRelay.accept(topicId)
             }
-            .createDialog()
-            .show()
+        }
+
+        actionsRecycler.layoutManager = LinearLayoutManager(context)
+        actionsRecycler.adapter = actionsAdapter
+
+        bottomSheetDialog.setContentView(sheetView)
+        bottomSheetDialog.show()
     }
 
     override fun showPinFailed() {
@@ -151,6 +178,8 @@ class TopicsViewImpl(
     override fun getStartedClicks(): Observable<Unit> = getStartedRelay
 
     override fun retryButtonClicks(): Observable<Unit> = retryButtonRelay
+
+    override fun refreshClicks(): Observable<Unit> = refreshRelay
 
     override fun pinTopicClicks(): Observable<Int> = pinTopicRelay
 

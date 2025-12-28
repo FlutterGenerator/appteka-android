@@ -8,6 +8,8 @@ import com.tomclaw.appsend.screen.about.di.AboutComponent
 import com.tomclaw.appsend.screen.about.di.AboutModule
 import com.tomclaw.appsend.screen.agreement.di.AgreementComponent
 import com.tomclaw.appsend.screen.agreement.di.AgreementModule
+import com.tomclaw.appsend.screen.bdui.di.BduiScreenComponent
+import com.tomclaw.appsend.screen.bdui.di.BduiScreenModule
 import com.tomclaw.appsend.screen.auth.request_code.di.RequestCodeComponent
 import com.tomclaw.appsend.screen.auth.request_code.di.RequestCodeModule
 import com.tomclaw.appsend.screen.auth.verify_code.di.VerifyCodeComponent
@@ -44,6 +46,12 @@ import com.tomclaw.appsend.screen.ratings.di.RatingsComponent
 import com.tomclaw.appsend.screen.ratings.di.RatingsModule
 import com.tomclaw.appsend.screen.reviews.di.ReviewsComponent
 import com.tomclaw.appsend.screen.reviews.di.ReviewsModule
+import com.tomclaw.appsend.screen.search.di.SearchComponent
+import com.tomclaw.appsend.screen.search.di.SearchModule
+import com.tomclaw.appsend.screen.settings.di.SettingsActivityComponent
+import com.tomclaw.appsend.screen.settings.di.SettingsActivityModule
+import com.tomclaw.appsend.screen.settings.di.SettingsComponent
+import com.tomclaw.appsend.screen.settings.di.SettingsModule
 import com.tomclaw.appsend.screen.store.di.StoreComponent
 import com.tomclaw.appsend.screen.store.di.StoreModule
 import com.tomclaw.appsend.screen.users.di.SubscribersComponent
@@ -77,6 +85,12 @@ interface AppComponent {
 
     fun storeComponent(module: StoreModule): StoreComponent
 
+    fun searchComponent(module: SearchModule): SearchComponent
+
+    fun settingsActivityComponent(module: SettingsActivityModule): SettingsActivityComponent
+
+    fun settingsComponent(module: SettingsModule): SettingsComponent
+
     fun detailsComponent(module: DetailsModule): DetailsComponent
 
     fun rateComponent(module: RateModule): RateComponent
@@ -106,6 +120,8 @@ interface AppComponent {
     fun ratingsComponent(module: RatingsModule): RatingsComponent
 
     fun agreementComponent(module: AgreementModule): AgreementComponent
+
+    fun bduiScreenComponent(module: BduiScreenModule): BduiScreenComponent
 
     fun aboutComponent(module: AboutModule): AboutComponent
 

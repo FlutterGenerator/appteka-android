@@ -11,22 +11,21 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.tomclaw.appsend.Appteka
 import com.tomclaw.appsend.R
-import com.tomclaw.appsend.main.settings.SettingsActivity.createSettingsActivityIntent
-import com.tomclaw.appsend.main.store.search.SearchActivity.createSearchActivityIntent
 import com.tomclaw.appsend.screen.about.createAboutActivityIntent
+import com.tomclaw.appsend.screen.bdui.createBduiScreenActivityIntent
 import com.tomclaw.appsend.screen.details.createDetailsActivityIntent
 import com.tomclaw.appsend.screen.distro.createDistroActivityIntent
 import com.tomclaw.appsend.screen.feed.createFeedFragment
 import com.tomclaw.appsend.screen.home.di.HomeModule
 import com.tomclaw.appsend.screen.installed.createInstalledActivityIntent
-import com.tomclaw.appsend.screen.moderation.createModerationActivityIntent
 import com.tomclaw.appsend.screen.post.createPostActivityIntent
 import com.tomclaw.appsend.screen.profile.createProfileFragment
+import com.tomclaw.appsend.screen.search.createSearchActivityIntent
+import com.tomclaw.appsend.screen.settings.createSettingsActivityIntent
 import com.tomclaw.appsend.screen.store.createStoreFragment
 import com.tomclaw.appsend.screen.topics.createTopicsFragment
 import com.tomclaw.appsend.screen.upload.createUploadActivityIntent
 import com.tomclaw.appsend.util.Analytics
-import com.tomclaw.appsend.util.restartIfThemeChanged
 import com.tomclaw.appsend.util.updateTheme
 import javax.inject.Inject
 import kotlin.system.exitProcess
@@ -39,8 +38,14 @@ class HomeActivity : AppCompatActivity(), HomePresenter.HomeRouter {
     @Inject
     lateinit var analytics: Analytics
 
-    private var isDarkTheme: Boolean = false
     private val handler: Handler = Handler(Looper.getMainLooper())
+    private var pendingFragmentRunnable: Runnable? = null
+
+    private val backCallback = object : OnBackPressedCallback(false) {
+        override fun handleOnBackPressed() {
+            presenter.onBackPressed()
+        }
+    }
 
     private val postLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -54,16 +59,12 @@ class HomeActivity : AppCompatActivity(), HomePresenter.HomeRouter {
         Appteka.getComponent()
             .homeComponent(HomeModule(context = this, startAction = intent.action, presenterState))
             .inject(activity = this)
-        isDarkTheme = updateTheme()
+        updateTheme()
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.home_activity)
 
-        onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                presenter.onBackPressed()
-            }
-        })
+        onBackPressedDispatcher.addCallback(backCallback)
 
         val view = HomeViewImpl(window.decorView)
 
@@ -117,11 +118,6 @@ class HomeActivity : AppCompatActivity(), HomePresenter.HomeRouter {
         startActivity(intent)
     }
 
-    override fun openModerationScreen() {
-        val intent = createModerationActivityIntent(this)
-        startActivity(intent)
-    }
-
     override fun openInstalledScreen() {
         val intent = createInstalledActivityIntent(this)
         startActivity(intent)
@@ -149,14 +145,18 @@ class HomeActivity : AppCompatActivity(), HomePresenter.HomeRouter {
     }
 
     private fun replaceFragment(fragment: Fragment, index: Int) {
-        val pendingRunnable = Runnable {
-            supportFragmentManager
-                .beginTransaction()
-                .setCustomAnimations(0, 0)
-                .replace(R.id.frame, fragment, "fragment$index")
-                .commit()
+        pendingFragmentRunnable?.let { handler.removeCallbacks(it) }
+        val runnable = Runnable {
+            if (!isFinishing && !supportFragmentManager.isStateSaved) {
+                supportFragmentManager
+                    .beginTransaction()
+                    .setCustomAnimations(0, 0)
+                    .replace(R.id.frame, fragment, "fragment$index")
+                    .commitAllowingStateLoss()
+            }
         }
-        handler.post(pendingRunnable)
+        pendingFragmentRunnable = runnable
+        handler.post(runnable)
     }
 
     override fun onStart() {
@@ -165,13 +165,14 @@ class HomeActivity : AppCompatActivity(), HomePresenter.HomeRouter {
     }
 
     override fun onStop() {
+        pendingFragmentRunnable?.let { handler.removeCallbacks(it) }
+        pendingFragmentRunnable = null
         presenter.detachRouter()
         super.onStop()
     }
 
     override fun onResume() {
         super.onResume()
-        restartIfThemeChanged(isDarkTheme)
     }
 
     override fun onDestroy() {
@@ -205,12 +206,26 @@ class HomeActivity : AppCompatActivity(), HomePresenter.HomeRouter {
         startActivity(chooser)
     }
 
+    override fun openBduiScreen(url: String, title: String?) {
+        val intent = createBduiScreenActivityIntent(this, url, title)
+        startActivity(intent)
+    }
+
+    override fun setBackCallbackEnabled(enabled: Boolean) {
+        backCallback.isEnabled = enabled
+    }
+
     override fun leaveScreen() {
         finish()
     }
 
     override fun exitApp() {
         exitProcess(0)
+    }
+
+    override fun onTabReselected() {
+        val fragment = supportFragmentManager.findFragmentById(R.id.frame) as? HomeFragment
+        fragment?.onReselect()
     }
 
 }

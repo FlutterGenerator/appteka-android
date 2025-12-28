@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipe_refresh"
@@ -44,7 +45,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/button_approve"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
+                style="@style/Widget.Material3.Button.TextButton"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="6dp"
@@ -64,7 +65,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/button_deny"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
+                style="@style/Widget.Material3.Button.TextButton"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="6dp"
@@ -117,7 +118,7 @@
             android:layout_gravity="center"
             android:layout_marginTop="16dp"
             android:text="@string/retry"
-            app:cornerRadius="99dp" />
+            />
 
     </LinearLayout>
 

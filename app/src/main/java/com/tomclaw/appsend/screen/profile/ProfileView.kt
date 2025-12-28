@@ -1,17 +1,18 @@
 package com.tomclaw.appsend.screen.profile
 
 import android.annotation.SuppressLint
+import android.content.DialogInterface
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.avito.konveyor.adapter.SimpleRecyclerAdapter
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import com.jakewharton.rxrelay3.PublishRelay
@@ -165,7 +166,7 @@ class ProfileViewImpl(
 
     override fun showEditNameDialog(name: String, nameRegex: String?) {
         var editUserName: TextInputEditText? = null
-        val dialog = AlertDialog.Builder(context)
+        val dialog = MaterialAlertDialogBuilder(context)
             .setTitle(context.getString(R.string.edit_name_title))
             .setView(R.layout.profile_edit_name_dialog)
             .setPositiveButton(R.string.ok) { _, _ ->
@@ -179,6 +180,7 @@ class ProfileViewImpl(
             .findViewById<TextInputEditText>(R.id.user_name)
             ?.apply {
                 this.setText(name)
+                this.setSelection(text?.length ?: 0)
             }
 
         if (nameRegex != null) {
@@ -187,15 +189,15 @@ class ProfileViewImpl(
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
                 override fun afterTextChanged(s: Editable?) {
                     dialog
-                        .getButton(AlertDialog.BUTTON_POSITIVE)
-                        .setEnabled(s.toString().matches(nameRegex.toRegex()))
+                        .getButton(DialogInterface.BUTTON_POSITIVE)
+                        .isEnabled = s.toString().matches(nameRegex.toRegex())
                 }
             })
         }
     }
 
     override fun showEliminationDialog() {
-        AlertDialog.Builder(context)
+        MaterialAlertDialogBuilder(context)
             .setTitle(context.getString(R.string.eliminate_user_title))
             .setMessage(context.getString(R.string.eliminate_user_message))
             .setNegativeButton(R.string.yes) { _, _ ->

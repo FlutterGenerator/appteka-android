@@ -38,9 +38,13 @@ class FavoriteItemPresenter(
         }
         if (item.hasProgress) view.showProgress() else view.hideProgress()
         if (!item.actions.isNullOrEmpty()) view.showMenu() else view.hideMenu()
+        item.reacts.takeIf { !it.isNullOrEmpty() }
+            ?.let { view.setReactions(it) }
+            ?: view.hideReactions()
         view.setOnPostClickListener { listener.onItemClick(item) }
         view.setOnAppClickListener { listener.onAppClick(item.appId, item.title) }
         view.setOnMenuClickListener { listener.onMenuClick(item) }
+        view.setOnReactionClickListener { reaction -> listener.onReactionClick(item, reaction) }
     }
 
 }

@@ -9,6 +9,7 @@ import com.tomclaw.appsend.download.COMPLETED
 import com.tomclaw.appsend.download.DownloadManager
 import com.tomclaw.appsend.download.IDLE
 import com.tomclaw.appsend.screen.details.adapter.ItemListener
+import com.tomclaw.appsend.screen.details.adapter.play.PlaySecurityStatus
 import com.tomclaw.appsend.screen.details.adapter.screenshot.ScreenshotItem
 import com.tomclaw.appsend.screen.details.adapter.status.StatusAction
 import com.tomclaw.appsend.screen.details.api.ACTION_DELETE
@@ -16,6 +17,9 @@ import com.tomclaw.appsend.screen.details.api.ACTION_EDIT_META
 import com.tomclaw.appsend.screen.details.api.ACTION_UNLINK
 import com.tomclaw.appsend.screen.details.api.ACTION_UNPUBLISH
 import com.tomclaw.appsend.screen.details.api.Details
+import com.tomclaw.appsend.screen.details.api.SECURITY_STATUS_COMPLETED
+import com.tomclaw.appsend.screen.details.api.SECURITY_VERDICT_MALWARE
+import com.tomclaw.appsend.screen.details.api.SECURITY_VERDICT_SUSPICIOUS
 import com.tomclaw.appsend.screen.details.api.TranslationResponse
 import com.tomclaw.appsend.screen.gallery.GalleryItem
 import com.tomclaw.appsend.user.api.UserBrief
@@ -218,6 +222,9 @@ class DetailsPresenterImpl(
         subscriptions += view.loginClicks().subscribe {
             router?.openLoginScreen()
         }
+        subscriptions += view.securityDownloadConfirmClicks().subscribe {
+            router?.requestStoragePermissions { onInstall() }
+        }
 
         if (moderation) {
             view.showModeration()
@@ -274,6 +281,10 @@ class DetailsPresenterImpl(
     private fun onDetailsLoaded(details: Details) {
         this.details = details
         this.isFavorite = details.isFavorite == true
+        details.translation?.let { translation ->
+            this.translationData = translation
+            this.translationState = TRANSLATION_TRANSLATED
+        }
         dispatchPackageStatus()
     }
 
@@ -460,6 +471,27 @@ class DetailsPresenterImpl(
     }
 
     override fun onInstallClick() {
+        val security = details?.security
+        if (security?.status == SECURITY_STATUS_COMPLETED) {
+            when (security.verdict) {
+                SECURITY_VERDICT_MALWARE -> {
+                    view?.showSecurityWarningDialog(
+                        title = resourceProvider.securityWarningMalwareTitle(),
+                        message = resourceProvider.securityWarningMalwareMessage(),
+                        downloadButton = resourceProvider.securityWarningDownloadAnyway()
+                    )
+                    return
+                }
+                SECURITY_VERDICT_SUSPICIOUS -> {
+                    view?.showSecurityWarningDialog(
+                        title = resourceProvider.securityWarningSuspiciousTitle(),
+                        message = resourceProvider.securityWarningSuspiciousMessage(),
+                        downloadButton = resourceProvider.securityWarningDownloadAnyway()
+                    )
+                    return
+                }
+            }
+        }
         router?.requestStoragePermissions { onInstall() }
     }
 
@@ -634,6 +666,31 @@ class DetailsPresenterImpl(
             items = items.map { GalleryItem(it.original, it.width, it.height) },
             current = clicked,
         )
+    }
+
+    override fun onRequestSecurityScan(appId: String) {
+        subscriptions += interactor.requestSecurityScan(appId)
+            .toObservable()
+            .observeOn(schedulers.mainThread())
+            .subscribe(
+                { onSecurityScanRequested() },
+                { onSecurityScanError(it) }
+            )
+    }
+
+    override fun onSecurityInfoClick(status: PlaySecurityStatus, score: Int?) {
+        view?.showSecurityInfoDialog(status, score)
+    }
+
+    private fun onSecurityScanRequested() {
+        view?.showSnackbar(resourceProvider.securityScanRequestedText())
+        invalidateDetails()
+    }
+
+    private fun onSecurityScanError(ex: Throwable) {
+        ex.filterUnauthorizedErrors({ view?.showUnauthorizedError() }) {
+            view?.showSnackbar(resourceProvider.securityScanErrorText())
+        }
     }
 
 }

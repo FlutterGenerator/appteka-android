@@ -2,7 +2,8 @@ package com.tomclaw.appsend.screen.store
 
 import android.annotation.SuppressLint
 import android.view.View
-import android.widget.ImageView
+import android.widget.AdapterView
+import android.widget.AutoCompleteTextView
 import android.widget.TextView
 import android.widget.ViewFlipper
 import androidx.recyclerview.widget.DefaultItemAnimator
@@ -10,12 +11,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.avito.konveyor.adapter.SimpleRecyclerAdapter
-import com.github.rubensousa.bottomsheetbuilder.BottomSheetBuilder
+import com.google.android.material.textfield.TextInputLayout
 import com.jakewharton.rxrelay3.PublishRelay
 import com.tomclaw.appsend.R
-import com.tomclaw.appsend.categories.CategoryItem
 import com.tomclaw.appsend.util.clicks
-import com.tomclaw.appsend.util.getAttributedColor
 import com.tomclaw.appsend.util.hideWithAlphaAnimation
 import com.tomclaw.appsend.util.showWithAlphaAnimation
 import com.tomclaw.appsend.util.svgToDrawable
@@ -35,9 +34,11 @@ interface StoreView {
 
     fun showError()
 
-    fun showCategories(items: List<CategoryItem>)
+    fun showCategories(items: List<CategoryDropdownItem>)
 
-    fun setSelectedCategory(category: CategoryItem?)
+    fun setSelectedCategory(item: CategoryDropdownItem)
+
+    fun scrollToTop()
 
     fun stopPullRefreshing()
 
@@ -47,11 +48,7 @@ interface StoreView {
 
     fun refreshClicks(): Observable<Unit>
 
-    fun categoriesButtonClicks(): Observable<Unit>
-
-    fun categorySelectedClicks(): Observable<CategoryItem>
-
-    fun categoryClearedClicks(): Observable<Unit>
+    fun categorySelectedClicks(): Observable<Int>
 
 }
 
@@ -68,15 +65,14 @@ class StoreViewImpl(
     private val recycler: RecyclerView = view.findViewById(R.id.recycler)
     private val error: TextView = view.findViewById(R.id.error_text)
     private val retryButton: View = view.findViewById(R.id.button_retry)
-    private val categoriesButton: View = view.findViewById(R.id.button_categories)
-    private val categoryIcon: ImageView = view.findViewById(R.id.category_icon)
-    private val categoryTitle: TextView = view.findViewById(R.id.category_title)
+    private val categoryDropdownLayout: TextInputLayout =
+        view.findViewById(R.id.category_dropdown_layout)
+    private val categoryDropdown: AutoCompleteTextView =
+        view.findViewById(R.id.category_dropdown)
 
     private val retryRelay = PublishRelay.create<Unit>()
     private val refreshRelay = PublishRelay.create<Unit>()
-    private val categoriesButtonRelay = PublishRelay.create<Unit>()
-    private val categorySelectedRelay = PublishRelay.create<CategoryItem>()
-    private val categoryClearedRelay = PublishRelay.create<Unit>()
+    private val categorySelectedRelay = PublishRelay.create<Int>()
 
     init {
         val orientation = RecyclerView.VERTICAL
@@ -88,72 +84,59 @@ class StoreViewImpl(
         recycler.itemAnimator?.changeDuration = DURATION_MEDIUM
 
         refresher.setOnRefreshListener { refreshRelay.accept(Unit) }
-        categoriesButton.setOnClickListener { categoriesButtonRelay.accept(Unit) }
+
+        retryButton.clicks(retryRelay)
+
+        categoryDropdown.onItemClickListener =
+            AdapterView.OnItemClickListener { _, _, position, _ ->
+                categorySelectedRelay.accept(position)
+            }
     }
 
     override fun showProgress() {
         refresher.isEnabled = false
-        flipper.displayedChild = 0
+        flipper.displayedChild = CHILD_CONTENT
         overlayProgress.showWithAlphaAnimation(animateFully = true)
     }
 
     override fun showContent() {
         refresher.isEnabled = true
-        flipper.displayedChild = 0
+        flipper.displayedChild = CHILD_CONTENT
         overlayProgress.hideWithAlphaAnimation(animateFully = false)
     }
 
     override fun showPlaceholder() {
         refresher.isRefreshing = false
         refresher.isEnabled = true
-        flipper.displayedChild = 1
+        flipper.displayedChild = CHILD_PLACEHOLDER
     }
 
     override fun showError() {
         refresher.isEnabled = true
-        flipper.displayedChild = 2
+        flipper.displayedChild = CHILD_ERROR
 
         error.setText(R.string.load_files_error)
-        retryButton.clicks(retryRelay)
     }
 
-    override fun showCategories(items: List<CategoryItem>) {
-        val theme = R.style.BottomSheetDialogDark.takeIf { preferences.isDarkTheme() }
-            ?: R.style.BottomSheetDialogLight
-        BottomSheetBuilder(context, theme)
-            .setMode(BottomSheetBuilder.MODE_LIST)
-            .setIconTintColor(getAttributedColor(context, R.attr.menu_icons_tint))
-            .setItemTextColor(getAttributedColor(context, R.attr.text_primary_color))
-            .apply {
-                addItem(0, R.string.all_categories, R.drawable.ic_category)
-            }
-            .apply {
-                for (item in items) {
-                    val title = item.title
-                    val icon = svgToDrawable(item.icon, context.resources)
-                    addItem(item.id, title, icon)
-                }
-            }
-            .setItemClickListener { item ->
-                val categoryItem = items.find {
-                    it.id == item.itemId
-                } ?: run {
-                    categoryClearedRelay.accept(Unit)
-                    return@setItemClickListener
-                }
-                categorySelectedRelay.accept(categoryItem)
-            }
-            .createDialog()
-            .show()
+    override fun showCategories(items: List<CategoryDropdownItem>) {
+        val dropdownAdapter = CategoryDropdownAdapter(context, items)
+        categoryDropdown.setAdapter(dropdownAdapter)
     }
 
-    override fun setSelectedCategory(category: CategoryItem?) {
-        category?.let {
-            categoryIcon.setImageDrawable(svgToDrawable(it.icon, context.resources))
-            categoryTitle.text = it.title
-        } ?: run {
-            categoryIcon.setImageResource(R.drawable.ic_category)
-            categoryTitle.setText(R.string.category_not_defined)
+    override fun setSelectedCategory(item: CategoryDropdownItem) {
+        categoryDropdown.setText(item.title, false)
+        updateStartIcon(item)
+    }
+
+    override fun scrollToTop() {
+        recycler.scrollToPosition(0)
+    }
+
+    private fun updateStartIcon(item: CategoryDropdownItem) {
+        if (item.iconSvg != null) {
+            categoryDropdownLayout.startIconDrawable = svgToDrawable(item.iconSvg, context.resources)
+        } else {
+            categoryDropdownLayout.setStartIconDrawable(R.drawable.ic_category)
         }
     }
 
@@ -176,12 +159,11 @@ class StoreViewImpl(
 
     override fun refreshClicks(): Observable<Unit> = refreshRelay
 
-    override fun categoriesButtonClicks(): Observable<Unit> = categoriesButtonRelay
-
-    override fun categorySelectedClicks(): Observable<CategoryItem> = categorySelectedRelay
-
-    override fun categoryClearedClicks(): Observable<Unit> = categoryClearedRelay
+    override fun categorySelectedClicks(): Observable<Int> = categorySelectedRelay
 
 }
 
 private const val DURATION_MEDIUM = 300L
+private const val CHILD_CONTENT = 0
+private const val CHILD_PLACEHOLDER = 1
+private const val CHILD_ERROR = 2

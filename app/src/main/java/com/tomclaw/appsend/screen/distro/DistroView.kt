@@ -1,12 +1,10 @@
 package com.tomclaw.appsend.screen.distro
 
 import android.annotation.SuppressLint
-import android.text.Html
 import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
 import android.widget.ViewFlipper
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.DefaultItemAnimator
@@ -14,13 +12,14 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.avito.konveyor.adapter.SimpleRecyclerAdapter
-import com.github.rubensousa.bottomsheetbuilder.BottomSheetBuilder
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.snackbar.Snackbar
 import com.jakewharton.rxrelay3.PublishRelay
 import com.tomclaw.appsend.R
 import com.tomclaw.appsend.screen.distro.adapter.apk.ApkItem
+import com.tomclaw.appsend.util.ActionItem
+import com.tomclaw.appsend.util.ActionsAdapter
 import com.tomclaw.appsend.util.clicks
-import com.tomclaw.appsend.util.getAttributedColor
 import com.tomclaw.appsend.util.hideWithAlphaAnimation
 import com.tomclaw.appsend.util.showWithAlphaAnimation
 import io.reactivex.rxjava3.core.Observable
@@ -40,7 +39,7 @@ interface DistroView {
 
     fun showError()
 
-    fun showExtractSuccess(path: String)
+    fun showExtractSuccess()
 
     fun showExtractError()
 
@@ -115,6 +114,8 @@ class DistroViewImpl(
         recycler.itemAnimator?.changeDuration = DURATION_MEDIUM
 
         refresher.setOnRefreshListener { refreshRelay.accept(Unit) }
+
+        retryButton.clicks(retryRelay)
     }
 
     override fun showProgress() {
@@ -140,21 +141,10 @@ class DistroViewImpl(
         flipper.displayedChild = 2
 
         error.setText(R.string.load_files_error)
-        retryButton.clicks(retryRelay)
     }
 
-    override fun showExtractSuccess(path: String) {
-        val alertDialog = AlertDialog.Builder(context)
-            .setTitle(R.string.success)
-            .setMessage(
-                Html.fromHtml(context.getString(R.string.app_extract_success, path))
-            )
-            .setPositiveButton(
-                R.string.yes
-            ) { _, _ -> shareExtractedRelay.accept(path) }
-            .setNegativeButton(R.string.no, null)
-            .create()
-        alertDialog.show()
+    override fun showExtractSuccess() {
+        showSnackbar(context.resources.getString(R.string.app_extract_success))
     }
 
     override fun showExtractError() {
@@ -162,29 +152,32 @@ class DistroViewImpl(
     }
 
     override fun showItemDialog(item: ApkItem) {
-        val theme = R.style.BottomSheetDialogDark.takeIf { preferences.isDarkTheme() }
-            ?: R.style.BottomSheetDialogLight
-        BottomSheetBuilder(view.context, theme)
-            .setMode(BottomSheetBuilder.MODE_LIST)
-            .setIconTintColor(getAttributedColor(view.context, R.attr.menu_icons_tint))
-            .setItemTextColor(getAttributedColor(view.context, R.attr.text_primary_color))
-            .setMenu(R.menu.distro_app_menu)
-            .setItemClickListener {
-                val id = when (it.itemId) {
-                    R.id.menu_install_app -> MENU_INSTALL
-                    R.id.menu_share_apk -> MENU_SHARE
-                    R.id.menu_upload_apk -> MENU_UPLOAD
-                    R.id.menu_bluetooth_apk -> MENU_BLUETOOTH
-                    R.id.menu_find_on_gp -> MENU_FIND_ON_GP
-                    R.id.menu_find_on_store -> MENU_FIND_ON_STORE
-                    R.id.menu_required_permissions -> MENU_PERMISSIONS
-                    R.id.menu_remove_app -> MENU_REMOVE
-                    else -> return@setItemClickListener
-                }
-                itemMenuRelay.accept(Pair(id, item))
-            }
-            .createDialog()
-            .show()
+        val bottomSheetDialog = BottomSheetDialog(context)
+        val sheetView = View.inflate(context, R.layout.bottom_sheet_actions, null)
+        val actionsRecycler: RecyclerView = sheetView.findViewById(R.id.actions_recycler)
+
+        val actions = listOf(
+            ActionItem(MENU_INSTALL, context.getString(R.string.install_app), R.drawable.ic_get_app),
+            ActionItem(MENU_SHARE, context.getString(R.string.share_apk), R.drawable.ic_share),
+            ActionItem(MENU_EXTRACT, context.getString(R.string.extract_apk), R.drawable.ic_floppy),
+            ActionItem(MENU_UPLOAD, context.getString(R.string.upload_apk), R.drawable.ic_cloud_upload),
+            ActionItem(MENU_BLUETOOTH, context.getString(R.string.bluetooth_apk), R.drawable.ic_bluetooth),
+            ActionItem(MENU_FIND_ON_GP, context.getString(R.string.find_on_gp), R.drawable.ic_google_play),
+            ActionItem(MENU_FIND_ON_STORE, context.getString(R.string.find_on_store), R.drawable.ic_store),
+            ActionItem(MENU_PERMISSIONS, context.getString(R.string.required_permissions), R.drawable.ic_lock_open),
+            ActionItem(MENU_REMOVE, context.getString(R.string.remove_app), R.drawable.ic_delete)
+        )
+
+        val actionsAdapter = ActionsAdapter(actions) { actionId ->
+            bottomSheetDialog.dismiss()
+            itemMenuRelay.accept(Pair(actionId, item))
+        }
+
+        actionsRecycler.layoutManager = LinearLayoutManager(context)
+        actionsRecycler.adapter = actionsAdapter
+
+        bottomSheetDialog.setContentView(sheetView)
+        bottomSheetDialog.show()
     }
 
     override fun showSnackbar(text: String) {
@@ -222,11 +215,12 @@ class DistroViewImpl(
 
 const val MENU_INSTALL = 1
 const val MENU_SHARE = 2
-const val MENU_UPLOAD = 3
-const val MENU_BLUETOOTH = 4
-const val MENU_FIND_ON_GP = 5
-const val MENU_FIND_ON_STORE = 6
-const val MENU_PERMISSIONS = 7
-const val MENU_REMOVE = 8
+const val MENU_EXTRACT = 3
+const val MENU_UPLOAD = 4
+const val MENU_BLUETOOTH = 5
+const val MENU_FIND_ON_GP = 6
+const val MENU_FIND_ON_STORE = 7
+const val MENU_PERMISSIONS = 8
+const val MENU_REMOVE = 9
 
 private const val DURATION_MEDIUM = 300L

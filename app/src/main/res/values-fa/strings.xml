@@ -11,7 +11,6 @@
     <string name="tomclaw_software">نویسنده برنامه: گروه نرم افزاری TomClaw</string>
     <string name="app_version">نسخه %1$s (%2$d)</string>
     <string name="info">اطلاعات</string>
-    <string name="pref_base_title">تنظیمات پایه</string>
     <string name="pref_summary_show_system">نمایش برنامه های سیستمی در فهرست برنامه ها</string>
     <string name="pref_title_show_system">برنامه های سیستمی</string>
     <string name="got_it">فهمیدم</string>
@@ -44,19 +43,32 @@
     <string name="pref_summary_clear_cache">تمام فایل های APK استخراج شده قبلی را از پوشه دانلود ها حذف می‌کند</string>
     <string name="cache_cleared_successfully">حافظه پنهان با موفقیت پاکسازی شد</string>
     <string name="cache_clearing_failed">حافظه پنهان پاکسازی نشد</string>
-    <string name="write_permission_extract">برای ذخیره فایل برنامه باید مجوز ذخیره سازی را فعال کنید</string>
-    <string name="permission_denied_message">بدون اجازه لازم نمی توان ادامه داد</string>
     <string name="menu_search">جستجو</string>
     <string name="run_app">اجرای برنامه</string>
     <string name="non_launchable_package">این بسته قابل اجرا نیست</string>
     <string name="app_details">اطلاعات برنامه</string>
     <string name="install">نصب</string>
     <string name="install_app">نصب برنامه</string>
-    <string name="write_permission_install">برای نصب برنامه ها باید مجوزهای ذخیره سازی را اعطا کنید</string>
     <string name="request_delete_packages">برای حذف برنامه ها باید مجوزها را اعطا کنید</string>
-    <string name="write_permission_select">برای جستجو و انتخاب برنامه ها باید مجوزهای ذخیره سازی را فعال کنید</string>
-    <string name="pref_title_dark_theme">حالت تاریک</string>
-    <string name="pref_dark_theme_system">استفاده از رنگ تاریک برای پس زمینه</string>
+    <string name="pref_title_theme">پوسته</string>
+    <string name="pref_summary_theme">پوسته برنامه را انتخاب کنید</string>
+    <string name="pref_title_dynamic_colors">رنگ‌های پویا</string>
+    <string name="pref_summary_dynamic_colors">استفاده از رنگ‌های پس‌زمینه در دستگاه‌های اندروید ۱۲+ (نیاز به راه‌اندازی مجدد)</string>
+    <string name="theme_dialog_title">انتخاب پوسته</string>
+    <string name="theme_system">پیش‌فرض سیستم</string>
+    <string name="theme_light">روشن</string>
+    <string name="theme_dark">تیره</string>
+    <string name="theme_battery_saver">صرفه‌جویی در باتری</string>
+    <string name="restart_now">اکنون راه‌اندازی مجدد</string>
+    <string name="clear_cache_dialog_title">تأیید پاکسازی حافظه پنهان</string>
+    <string name="clear_cache_dialog_message">همه فایل‌های APK که قبلاً توسط %1$s در حافظه دانلود شده‌اند، حذف خواهند شد. این عمل قابل بازگشت نیست. آیا مایل به ادامه هستید؟</string>
+    <string name="clear_cache_dialog_positive">بله، فایل‌ها را حذف کن</string>
+    <string name="restart_required_dynamic_colors_short">برای اعمال تغییرات، راه‌اندازی مجدد کنید.</string>
+    <string name="pref_category_appearance_title">ظاهر</string>
+    <string name="pref_category_app_behavior_title">رفتار برنامه</string>
+    <string name="pref_category_general_title">عمومی</string>
+    <string name="pick_apk">انتخاب فایل APK</string>
+    <string name="pick_installed">انتخاب برنامه نصب شده</string>
     <string name="cancel">لغو</string>
     <string name="percent" translatable="false">%d %%</string>
     <string name="upload">بارگذاری</string>
@@ -77,9 +89,6 @@
     <string name="update">به روز رسانی</string>
     <string name="abuse">ارسال گزارش</string>
     <string name="your_email">ایمیل شما</string>
-    <string name="thanks_for_attention">با تشکر از شما برای کمک شما در نظارت فروشگاه</string>
-    <string name="fill_all_fields">تمام جایگاه ها را پر کنید</string>
-    <string name="unable_to_get_permissions">دریافت مجوزهای مورد نیاز فهرست یا برنامه امکان پذیر نیست</string>
     <string name="store_app_update">به روز رسانی</string>
     <string name="store_app_installed">نصب شد</string>
     <string name="feedback_email">بازخورد</string>
@@ -89,7 +98,15 @@
     <string name="update_description">آخرین نسخه فروشگاه Appteka را به صورت رایگان دانلود کنید</string>
     <string name="later">بعدا</string>
     <string name="telegram_group">گروه تلگرام</string>
-    <string name="forum_4pda">انجمن 4pda</string>
+    <string name="telegram_subtitle">به جامعه ما بپیوندید</string>
+    <string name="source_code">کد منبع</string>
+    <string name="source_code_subtitle">مشاهده در GitHub</string>
+    <string name="contributors_subtitle">با تیم آشنا شوید</string>
+    <string name="feedback_subtitle">support@appteka.store</string>
+    <string name="legal_subtitle">سیاست حفظ حریم خصوصی و شرایط</string>
+    <string name="links">لینک‌ها</string>
+    <string name="support">پشتیبانی</string>
+    <string name="legal">حقوقی</string>
     <string name="get_started">شروع کنید</string>
     <string name="discuss_intro_text">گفتگو درباره برنامه مورد نظر خود را پیدا کنید
 نظرات خود را درباره بازی های جدید با دیگران به اشتراک بگذارید
@@ -108,6 +125,7 @@
     <string name="reply_form" translatable="false">&gt; %s\n</string>
     <string name="exclusive_short">انحصاری</string>
     <string name="exclusive">برنامه انحصاری (در فروشگاه گوگل پلی وجود ندارد)</string>
+    <string name="exclusive_description">برنامه در Google Play موجود نیست</string>
     <string name="description">توضیحات</string>
     <string name="edit_meta">ویرایش توضیحات</string>
     <string name="ratings">رتبه بندی ها</string>
@@ -129,7 +147,6 @@
     <string name="unlink_file">مسدود کردن</string>
     <string name="unfile_reason">دلیل…</string>
     <string name="enter_unfile_reason">لطفا علت را توضیح دهید:</string>
-    <string name="fill_reason_field">پر کردن جایگاه ضروری است</string>
     <string name="unable_to_unfile">درخواست تکمیل نشد</string>
     <string name="unlink_of">مسدود کردن از %s</string>
     <string name="profile_apps">برنامه های کاربر</string>
@@ -204,13 +221,18 @@
     <string name="enter_your_review">تجربه خود را به اشتراک بگذارید (اختیاری)</string>
     <string name="review_publish_failed">بازبینی انتشار ناموفق بود</string>
     <string name="your_review">دیدگاه شما</string>
+    <string name="review_required_error">برای امتیازات کمتر از 4، بررسی الزامی است و باید حداقل 10 کاراکتر داشته باشد</string>
+    <string name="rating_required_error">لطفاً امتیاز را انتخاب کنید</string>
     <string name="edit_feedback">ویرایش بازخورد</string>
     <string name="details_error_title">مشکلی پیش آمد</string>
     <string name="details_error_subtitle">می توانید دوباره امتحان کنید</string>
+    <string name="error_occurred">خطایی رخ داد</string>
+    <string name="check_connection">اتصال خود را بررسی کنید و دوباره امتحان کنید</string>
     <string name="discuss_description">با سایر کاربران در پیام رسان داخلی Appteka درباره برنامه گفتگو کنید</string>
     <string name="select_category">انتخاب دسته بندی</string>
     <string name="whats_new">ویژگی های جدید در این نسخه</string>
-    <string name="open_source">نرم افزار متن باز</string>
+    <string name="open_source">Open Source</string>
+    <string name="open_source_description">کد منبع به صورت عمومی در دسترس است</string>
     <string name="source_code_url">نشانی کد منبع</string>
     <string name="other_versions_title">نسخه های دیگر</string>
     <string name="check_uploaded_versions">بررسی نسخه های بارگذاری شده</string>
@@ -237,8 +259,39 @@
     <string name="unlinked_status_text">برنامه مسدود شده است و دیگر در دسترس نیست</string>
     <string name="private_status_text">برنامه در دسترسی خصوصی است و فقط از طریق لینک در دسترس است برای انتشار آن توضیحات را ویرایش کنید</string>
     <string name="moderation_status_text">برنامه تحت بررسی است و پس از تایید در دسترس کاربران Appteka قرار می گیرد یا در دسترسی خصوصی باقی می ماند</string>
+    <string name="request_security_scan">درخواست اسکن امنیتی</string>
+    <string name="retry_security_scan">تلاش مجدد اسکن</string>
+    <string name="security_not_scanned">اسکن نشده</string>
+    <string name="security_pending">اسکن امنیتی در انتظار…</string>
+    <string name="security_scanning">در حال جستجوی تهدیدات…</string>
+    <string name="security_safe">تایید شده، امن</string>
+    <string name="security_suspicious">مشکوک</string>
+    <string name="security_malware">بدافزار شناسایی شد</string>
+    <string name="security_unknown">وضعیت امنیتی نامشخص</string>
+    <string name="security_failed">اسکن امنیتی ناموفق بود</string>
+    <string name="security_scan_requested">درخواست اسکن امنیتی ارسال شد</string>
+    <string name="security_scan_error">درخواست اسکن امنیتی ناموفق بود</string>
+    <string name="security_scanning_short">اسکن</string>
+    <string name="security_safe_short">امن</string>
+    <string name="security_suspicious_short">مشکوک</string>
+    <string name="security_malware_short">بدافزار</string>
+    <string name="security_not_checked_short">بررسی نشده</string>
+    <string name="security_info_scanning">اسکن امنیتی در حال انجام…</string>
+    <string name="security_info_scanning_duration">اسکن با ClamAV, APKiD, Quark-Engine. ممکن است چند دقیقه طول بکشد بسته به اندازه فایل و صف.</string>
+    <string name="security_info_safe">امن — هیچ تهدیدی یافت نشد</string>
+    <string name="security_info_suspicious">مشکوک — خطرات احتمالی یافت شد</string>
+    <string name="security_info_malware">بدافزار شناسایی شد — این برنامه ممکن است مضر باشد</string>
+    <string name="security_info_unknown">تأیید نشد — اسکن امنیتی ناموفق بود</string>
+    <string name="security_info_score">امتیاز ریسک: %d%%</string>
+    <string name="security_info_tools">اسکن شده با: ClamAV, APKiD, Quark-Engine</string>
+    <string name="security_warning_malware_title">بدافزار شناسایی شد</string>
+    <string name="security_warning_malware_message">این برنامه توسط اسکن امنیتی ما به عنوان بدافزار شناسایی شده است. دانلود و نصب آن ممکن است به دستگاه شما آسیب برساند یا اطلاعات شخصی شما را به خطر بیندازد. آیا مطمئن هستید که می‌خواهید ادامه دهید؟</string>
+    <string name="security_warning_suspicious_title">برنامه مشکوک</string>
+    <string name="security_warning_suspicious_message">این برنامه توسط اسکن امنیتی ما به عنوان مشکوک شناسایی شده است. ممکن است حاوی کد بالقوه مضر باشد. آیا مطمئن هستید که می‌خواهید ادامه دهید؟</string>
+    <string name="security_warning_download_anyway">به هر حال دانلود کن</string>
     <string name="open_source_short">متن باز</string>
     <string name="required_field">جایگاه لازم</string>
+    <string name="description_min_length_error">توضیحات باید حداقل %d کاراکتر باشد</string>
     <string name="category_not_set">دسته بندی نشده</string>
     <string name="mark_favorite">علامت گذاری به عنوان مورد دلخواه</string>
     <string name="unmark_favorite">حذف از موارد دلخواه</string>
@@ -288,10 +341,16 @@
         <item quantity="one">برنامه مورد علاقه %d</item>
         <item quantity="other">برنامه مورد علاقه %d</item>
     </plurals>
+    <plurals name="moderation_apps_count">
+        <item quantity="one">%d برنامه در انتظار بررسی</item>
+        <item quantity="other">%d برنامه در انتظار بررسی</item>
+    </plurals>
+    <string name="no_apps_on_moderation">هیچ برنامه‌ای در انتظار بررسی نیست</string>
     <string name="show_all_ratings">نمایش همه نظرات</string>
     <string name="reviews_activity">نظرات کاربران</string>
     <string name="no_user_activity_yet">کاربر هنوز آنلاین نیست</string>
     <string name="legal_info">اطلاعات حقوقی</string>
+    <string name="contributors">مشارکت‌کنندگان</string>
     <string name="translate">ترجمه کردن</string>
     <string name="original">اصلی</string>
     <string name="wait">صبر کن…</string>
@@ -309,7 +368,6 @@
     <string name="subscribe">مشترک شوید</string>
     <string name="unsubscribe">لغو اشتراک</string>
     <string name="unable_to_change_subscription_state">تغییر وضعیت اشتراک انجام نشد</string>
-    <string name="subscriptions_activity">اشتراک ها</string>
     <string name="subscribed_date">مشترک شد %s</string>
     <string name="tab_feed">فید خبری</string>
     <string name="user_feed">اخبار کاربران</string>
@@ -329,4 +387,7 @@
         <item quantity="one">%d برنامه دانلود شد</item>
         <item quantity="other">%d برنامه ها دانلود شده اند</item>
     </plurals>
+    <string name="prefill_from_version">پر کردن از نسخه</string>
+    <string name="prefill_none">پر نکردن</string>
+    <string name="prefill_hint">کپی توضیحات، تصاویر و تنظیمات از نسخه قبلی</string>
 </resources>

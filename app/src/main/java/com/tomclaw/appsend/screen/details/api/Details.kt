@@ -30,6 +30,10 @@ data class Details(
     val info: AppInfo,
     @SerializedName("is_favorite")
     val isFavorite: Boolean?,
+    @SerializedName("security")
+    val security: Security?,
+    @SerializedName("translation")
+    val translation: TranslationResponse?,
 ) : Parcelable
 
 const val ACTION_UNLINK = "unlink"

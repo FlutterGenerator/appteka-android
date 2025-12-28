@@ -3,11 +3,13 @@ package com.tomclaw.appsend.screen.details.adapter.play
 import android.os.Build
 import com.avito.konveyor.blueprint.ItemPresenter
 import com.tomclaw.appsend.categories.DEFAULT_LOCALE
+import com.tomclaw.appsend.screen.details.adapter.ItemListener
 import java.util.Locale
 
 class PlayItemPresenter(
     private val locale: Locale,
-    private val resourceProvider: PlayResourceProvider
+    private val resourceProvider: PlayResourceProvider,
+    private val listener: ItemListener,
 ) : ItemPresenter<PlayItemView, PlayItem> {
 
     override fun bindView(view: PlayItemView, item: PlayItem, position: Int) {
@@ -39,6 +41,43 @@ class PlayItemPresenter(
                 view.showOsVersionIncompatible(osVersion)
             }
         } ?: view.hideOsVersion()
+
+        when (item.securityStatus) {
+            PlaySecurityStatus.SCANNING -> {
+                view.showSecurityScanning(resourceProvider.securityScanningShort())
+                view.setOnSecurityClickListener {
+                    listener.onSecurityInfoClick(item.securityStatus, item.securityScore)
+                }
+            }
+            PlaySecurityStatus.SAFE -> {
+                view.showSecuritySafe(resourceProvider.securitySafeShort())
+                view.setOnSecurityClickListener {
+                    listener.onSecurityInfoClick(item.securityStatus, item.securityScore)
+                }
+            }
+            PlaySecurityStatus.SUSPICIOUS -> {
+                view.showSecuritySuspicious(resourceProvider.securitySuspiciousShort())
+                view.setOnSecurityClickListener {
+                    listener.onSecurityInfoClick(item.securityStatus, item.securityScore)
+                }
+            }
+            PlaySecurityStatus.MALWARE -> {
+                view.showSecurityMalware(resourceProvider.securityMalwareShort())
+                view.setOnSecurityClickListener {
+                    listener.onSecurityInfoClick(item.securityStatus, item.securityScore)
+                }
+            }
+            PlaySecurityStatus.NOT_CHECKED -> {
+                view.showSecurityNotChecked(resourceProvider.securityNotCheckedShort())
+                view.setOnSecurityClickListener {
+                    listener.onSecurityInfoClick(item.securityStatus, item.securityScore)
+                }
+            }
+            null -> {
+                view.hideSecurityStatus()
+                view.setOnSecurityClickListener(null)
+            }
+        }
     }
 
 }

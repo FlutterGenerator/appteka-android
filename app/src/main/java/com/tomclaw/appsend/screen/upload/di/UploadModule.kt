@@ -13,6 +13,8 @@ import com.tomclaw.appsend.core.PackageInfoProvider
 import com.tomclaw.appsend.core.StoreApi
 import com.tomclaw.appsend.core.StreamsProvider
 import com.tomclaw.appsend.di.APPS_DIR
+import com.tomclaw.appsend.screen.upload.DescriptionValidator
+import com.tomclaw.appsend.screen.upload.DescriptionValidatorImpl
 import com.tomclaw.appsend.screen.upload.UploadConverter
 import com.tomclaw.appsend.screen.upload.UploadConverterImpl
 import com.tomclaw.appsend.screen.upload.UploadInteractor
@@ -35,6 +37,8 @@ import com.tomclaw.appsend.screen.upload.adapter.open_source.OpenSourceItemBluep
 import com.tomclaw.appsend.screen.upload.adapter.open_source.OpenSourceItemPresenter
 import com.tomclaw.appsend.screen.upload.adapter.other_versions.OtherVersionsItemBlueprint
 import com.tomclaw.appsend.screen.upload.adapter.other_versions.OtherVersionsItemPresenter
+import com.tomclaw.appsend.screen.upload.adapter.prefill_version.PrefillVersionItemBlueprint
+import com.tomclaw.appsend.screen.upload.adapter.prefill_version.PrefillVersionItemPresenter
 import com.tomclaw.appsend.screen.upload.adapter.screen_append.ScreenAppendItemBlueprint
 import com.tomclaw.appsend.screen.upload.adapter.screen_append.ScreenAppendItemPresenter
 import com.tomclaw.appsend.screen.upload.adapter.screen_image.ScreenImageItemBlueprint
@@ -81,6 +85,7 @@ class UploadModule(
         categoriesInteractor: CategoriesInteractor,
         categoryConverter: CategoryConverter,
         uploadConverter: UploadConverter,
+        descriptionValidator: DescriptionValidator,
         @Named(UPLOAD_ADAPTER_PRESENTER) adapterPresenter: Lazy<AdapterPresenter>,
         uploadManager: UploadManager,
         packageInfoProvider: PackageInfoProvider,
@@ -94,6 +99,7 @@ class UploadModule(
         categoriesInteractor,
         categoryConverter,
         uploadConverter,
+        descriptionValidator,
         adapterPresenter,
         uploadManager,
         packageInfoProvider,
@@ -133,10 +139,17 @@ class UploadModule(
 
     @Provides
     @PerActivity
+    internal fun provideDescriptionValidator(): DescriptionValidator {
+        return DescriptionValidatorImpl()
+    }
+
+    @Provides
+    @PerActivity
     internal fun provideUploadConverterProvider(
-        resourceProvider: UploadResourceProvider
+        resourceProvider: UploadResourceProvider,
+        descriptionValidator: DescriptionValidator
     ): UploadConverter {
-        return UploadConverterImpl(resourceProvider)
+        return UploadConverterImpl(resourceProvider, descriptionValidator)
     }
 
     @Provides
@@ -298,6 +311,19 @@ class UploadModule(
     internal fun provideOtherVersionsItemPresenter(
         presenter: UploadPresenter
     ) = OtherVersionsItemPresenter(presenter)
+
+    @Provides
+    @IntoSet
+    @PerActivity
+    internal fun providePrefillVersionItemBlueprint(
+        presenter: PrefillVersionItemPresenter
+    ): ItemBlueprint<*, *> = PrefillVersionItemBlueprint(presenter)
+
+    @Provides
+    @PerActivity
+    internal fun providePrefillVersionItemPresenter(
+        presenter: UploadPresenter
+    ) = PrefillVersionItemPresenter(presenter)
 
     @Provides
     @IntoSet

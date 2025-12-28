@@ -10,7 +10,6 @@ import android.content.pm.ResolveInfo
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
@@ -59,6 +58,15 @@ class DistroActivity : AppCompatActivity(), DistroPresenter.DistroRouter {
             }
         }
 
+    private val saveFileLauncher =
+        registerForActivityResult(StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                result.data?.data?.let { uri ->
+                    presenter.saveFile(target = uri)
+                }
+            }
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         val presenterState = savedInstanceState?.getBundle(KEY_PRESENTER_STATE)
         Appteka.getComponent()
@@ -78,12 +86,6 @@ class DistroActivity : AppCompatActivity(), DistroPresenter.DistroRouter {
         if (savedInstanceState == null) {
             analytics.trackEvent("open-distro-screen")
         }
-
-        onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                presenter.onBackPressed()
-            }
-        })
     }
 
     override fun onStart() {
@@ -207,6 +209,16 @@ class DistroActivity : AppCompatActivity(), DistroPresenter.DistroRouter {
     override fun requestStoragePermissions(callback: (Boolean) -> Unit) {
         // Storage permissions was deprecated by Google; content was moved to the internal storage
         callback(true)
+    }
+
+    override fun requestSaveFile(fileName: String, fileType: String) {
+        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
+            .apply {
+                addCategory(Intent.CATEGORY_OPENABLE)
+                type = fileType
+                putExtra(Intent.EXTRA_TITLE, fileName)
+            }
+        saveFileLauncher.launch(intent)
     }
 
     override fun leaveScreen() {

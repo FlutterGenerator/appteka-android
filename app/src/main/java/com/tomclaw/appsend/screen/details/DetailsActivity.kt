@@ -131,7 +131,7 @@ class DetailsActivity : AppCompatActivity(), DetailsPresenter.DetailsRouter {
         setContentView(R.layout.details_activity)
 
         val adapter = SimpleRecyclerAdapter(adapterPresenter, binder)
-        val view = DetailsViewImpl(window.decorView, preferences, adapter)
+        val view = DetailsViewImpl(this, window.decorView, preferences, adapter)
 
         presenter.attachView(view)
 
@@ -139,11 +139,14 @@ class DetailsActivity : AppCompatActivity(), DetailsPresenter.DetailsRouter {
             analytics.trackEvent("open-details-screen")
         }
 
-        onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                presenter.onBackPressed()
-            }
-        })
+        // Only intercept back if we need custom behavior (opening store screen)
+        if (!finishOnly) {
+            onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    presenter.onBackPressed()
+                }
+            })
+        }
     }
 
     @Suppress("DEPRECATION")

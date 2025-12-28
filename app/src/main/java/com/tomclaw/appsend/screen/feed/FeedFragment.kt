@@ -146,12 +146,16 @@ class FeedFragment : Fragment(), FeedPresenter.FeedRouter, HomeFragment {
     }
 
     override fun leaveScreen() {
-        activity?.onBackPressed()
+        activity?.onBackPressedDispatcher?.onBackPressed()
     }
 
     override fun handleEvent(data: Intent?) {
         val postId = data?.getIntExtra(EXTRA_POST_ID, 0)
         presenter.invalidate(postId?.takeIf { it != 0 })
+    }
+
+    override fun onReselect() {
+        presenter.scrollToBottom()
     }
 
 }

@@ -1,5 +1,6 @@
 package com.tomclaw.appsend.screen.feed.adapter.subscribe
 
+import android.annotation.SuppressLint
 import android.content.res.ColorStateList
 import android.view.View
 import android.widget.TextView
@@ -13,6 +14,11 @@ import com.tomclaw.appsend.view.UserIconViewImpl
 import androidx.core.graphics.toColorInt
 import com.tomclaw.appsend.util.hide
 import com.tomclaw.appsend.util.show
+import androidx.recyclerview.widget.DefaultItemAnimator
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.tomclaw.appsend.screen.feed.adapter.ReactionsAdapter
+import com.tomclaw.appsend.screen.feed.api.Reaction
 
 interface SubscribeItemView : ItemView {
 
@@ -40,10 +46,17 @@ interface SubscribeItemView : ItemView {
 
     fun setOnMenuClickListener(listener: (() -> Unit)?)
 
+    fun setReactions(reactions: List<Reaction>)
+
+    fun hideReactions()
+
+    fun setOnReactionClickListener(listener: ((Reaction) -> Unit)?)
+
 }
 
 class SubscribeItemViewHolder(
     view: View,
+    private val reactionsAdapter: ReactionsAdapter,
 ) : BaseViewHolder(view), SubscribeItemView {
 
     private val userIcon: UserIconView = UserIconViewImpl(view.findViewById(R.id.member_icon))
@@ -52,16 +65,25 @@ class SubscribeItemViewHolder(
     private val publisherName: TextView = view.findViewById(R.id.uploader_name)
     private val time: TextView = view.findViewById(R.id.date_view)
     private val publisherContainer: View = view.findViewById(R.id.uploader_container)
+    private val reactions: RecyclerView = view.findViewById(R.id.reactions)
     private val menu: View = view.findViewById(R.id.post_menu)
 
     private var postClickListener: (() -> Unit)? = null
     private var subscribedClickListener: (() -> Unit)? = null
     private var menuClickListener: (() -> Unit)? = null
+    private var reactionClickListener: ((Reaction) -> Unit)? = null
 
     init {
         view.setOnClickListener { postClickListener?.invoke() }
         menu.setOnClickListener { menuClickListener?.invoke() }
         publisherContainer.setOnClickListener { subscribedClickListener?.invoke() }
+
+        val reactionsOrientation = RecyclerView.HORIZONTAL
+        val reactionsLayoutManager = LinearLayoutManager(view.context, reactionsOrientation, false)
+        reactions.adapter = reactionsAdapter
+        reactions.layoutManager = reactionsLayoutManager
+        reactions.itemAnimator = DefaultItemAnimator()
+        reactions.itemAnimator?.changeDuration = 300L
     }
 
     override fun setUserIcon(icon: UserIcon) {
@@ -110,6 +132,30 @@ class SubscribeItemViewHolder(
 
     override fun setOnMenuClickListener(listener: (() -> Unit)?) {
         this.menuClickListener = listener
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    override fun setReactions(reactions: List<Reaction>) {
+        if (reactions.isNotEmpty()) {
+            this.reactions.show()
+            with(reactionsAdapter) {
+                dataSet.clear()
+                dataSet.addAll(reactions)
+                setClickListener(reactionClickListener)
+                notifyDataSetChanged()
+            }
+        } else {
+            this.reactions.hide()
+        }
+    }
+
+    override fun hideReactions() {
+        reactions.hide()
+    }
+
+    override fun setOnReactionClickListener(listener: ((Reaction) -> Unit)?) {
+        this.reactionClickListener = listener
+        reactionsAdapter.setClickListener(listener)
     }
 
     override fun onUnbind() {

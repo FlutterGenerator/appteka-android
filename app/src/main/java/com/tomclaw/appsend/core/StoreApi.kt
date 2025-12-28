@@ -15,6 +15,7 @@ import com.tomclaw.appsend.screen.chat.api.SendMessageResponse
 import com.tomclaw.appsend.screen.chat.api.TopicInfoResponse
 import com.tomclaw.appsend.screen.details.api.CreateTopicResponse
 import com.tomclaw.appsend.screen.details.api.DeletionResponse
+import com.tomclaw.appsend.screen.details.api.RequestScanResponse
 import com.tomclaw.appsend.screen.details.api.Details
 import com.tomclaw.appsend.screen.details.api.MarkFavoriteResponse
 import com.tomclaw.appsend.screen.details.api.ModerationDecisionResponse
@@ -22,6 +23,7 @@ import com.tomclaw.appsend.screen.details.api.TranslationResponse
 import com.tomclaw.appsend.screen.downloads.api.DownloadsResponse
 import com.tomclaw.appsend.screen.favorite.api.FavoriteResponse
 import com.tomclaw.appsend.screen.feed.api.DeletePostResponse
+import com.tomclaw.appsend.screen.feed.api.FeedReactionResponse
 import com.tomclaw.appsend.screen.feed.api.FeedResponse
 import com.tomclaw.appsend.screen.feed.api.ReadResponse
 import com.tomclaw.appsend.screen.home.api.StartupResponse
@@ -77,6 +79,13 @@ interface StoreApi {
     fun getTopListByCategory(
         @Query("app_id") appId: String?,
         @Query("category_id") categoryId: Int,
+        @Query("locale") locale: String
+    ): Single<StoreResponse<AppsListResponse>>
+
+    @GET("1/app/search")
+    fun searchApps(
+        @Query("query") query: String,
+        @Query("app_id") appId: String?,
         @Query("locale") locale: String
     ): Single<StoreResponse<AppsListResponse>>
 
@@ -154,7 +163,8 @@ interface StoreApi {
     @GET("1/app/info")
     fun getInfo(
         @Query("app_id") appId: String?,
-        @Query("package") packageName: String?
+        @Query("package") packageName: String?,
+        @Query("locale") locale: String
     ): Single<StoreResponse<Details>>
 
     @GET("1/app/info/translate")
@@ -334,6 +344,7 @@ interface StoreApi {
     fun postFeed(
         @Field("text") text: String,
         @Field("scr_ids") scrIds: List<String>?,
+        @Field("react_ids") reactionIds: List<String>?,
     ): Single<StoreResponse<FeedPostResponse>>
 
     @Multipart
@@ -349,6 +360,13 @@ interface StoreApi {
 
     @DELETE("1/feed/config")
     fun feedConfig(): Single<StoreResponse<FeedConfigResponse>>
+
+    @FormUrlEncoded
+    @POST("1/feed/reaction")
+    fun feedReaction(
+        @Field("tag") tag: String,
+        @Field("react_id") reactId: String,
+    ): Single<StoreResponse<FeedReactionResponse>>
 
     @GET("1/user/downloaded/list")
     fun getDownloadsList(
@@ -370,5 +388,11 @@ interface StoreApi {
         @Field("app_id") appId: String,
         @Field("reason") reason: String,
     ): Single<StoreResponse<UnpublishResponse>>
+
+    @FormUrlEncoded
+    @POST("1/app/scan")
+    fun requestSecurityScan(
+        @Field("app_id") appId: String,
+    ): Single<StoreResponse<RequestScanResponse>>
 
 }

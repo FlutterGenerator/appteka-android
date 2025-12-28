@@ -3,6 +3,7 @@ package com.tomclaw.appsend.screen.details.adapter.play
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import com.avito.konveyor.adapter.BaseViewHolder
 import com.avito.konveyor.blueprint.ItemView
 import com.tomclaw.appsend.R
@@ -44,6 +45,20 @@ interface PlayItemView : ItemView {
 
     fun hideOsVersion()
 
+    fun showSecurityScanning(title: String)
+
+    fun showSecuritySafe(title: String)
+
+    fun showSecuritySuspicious(title: String)
+
+    fun showSecurityMalware(title: String)
+
+    fun showSecurityNotChecked(title: String)
+
+    fun hideSecurityStatus()
+
+    fun setOnSecurityClickListener(listener: (() -> Unit)?)
+
 }
 
 class PlayItemViewHolder(view: View) : BaseViewHolder(view), PlayItemView {
@@ -63,6 +78,10 @@ class PlayItemViewHolder(view: View) : BaseViewHolder(view), PlayItemView {
     private val osVersionContainer: View = view.findViewById(R.id.os_version_container)
     private val osVersionView: TextView = view.findViewById(R.id.os_version_view)
     private val osIncompatibleImage: ImageView = view.findViewById(R.id.os_incompatible_image)
+    private val securityContainer: View = view.findViewById(R.id.security_container)
+    private val securityClickable: View = view.findViewById(R.id.security_clickable)
+    private val securityIcon: ImageView = view.findViewById(R.id.security_icon)
+    private val securityTitle: TextView = view.findViewById(R.id.security_title)
 
     override fun showRating(rating: String) {
         ratingContainer.show()
@@ -126,12 +145,61 @@ class PlayItemViewHolder(view: View) : BaseViewHolder(view), PlayItemView {
     override fun showOsVersionIncompatible(version: String) {
         osVersionContainer.show()
         osVersionView.bind(version)
-        osVersionView.setTextColor(context.resources.getColor(R.color.sdk_incompatible_tint))
+        osVersionView.setTextColor(ContextCompat.getColor(context, R.color.sdk_incompatible_tint))
         osIncompatibleImage.show()
     }
 
     override fun hideOsVersion() {
         osVersionContainer.hide()
+    }
+
+    override fun showSecurityScanning(title: String) {
+        securityContainer.show()
+        securityIcon.setImageResource(R.drawable.ic_timer_sand)
+        securityIcon.setColorFilter(ContextCompat.getColor(context, R.color.block_info_color))
+        securityTitle.bind(title)
+    }
+
+    override fun showSecuritySafe(title: String) {
+        securityContainer.show()
+        securityIcon.setImageResource(R.drawable.ic_verified)
+        securityIcon.setColorFilter(ContextCompat.getColor(context, R.color.block_success_color))
+        securityTitle.bind(title)
+    }
+
+    override fun showSecuritySuspicious(title: String) {
+        securityContainer.show()
+        securityIcon.setImageResource(R.drawable.ic_warning)
+        securityIcon.setColorFilter(ContextCompat.getColor(context, R.color.block_warning_color))
+        securityTitle.bind(title)
+    }
+
+    override fun showSecurityMalware(title: String) {
+        securityContainer.show()
+        securityIcon.setImageResource(R.drawable.ic_virus)
+        securityIcon.setColorFilter(ContextCompat.getColor(context, R.color.block_error_color))
+        securityTitle.bind(title)
+    }
+
+    override fun showSecurityNotChecked(title: String) {
+        securityContainer.show()
+        securityIcon.setImageResource(R.drawable.ic_security)
+        securityIcon.setColorFilter(ContextCompat.getColor(context, R.color.block_warning_color))
+        securityTitle.bind(title)
+    }
+
+    override fun hideSecurityStatus() {
+        securityContainer.hide()
+    }
+
+    override fun setOnSecurityClickListener(listener: (() -> Unit)?) {
+        if (listener != null) {
+            securityClickable.isClickable = true
+            securityClickable.setOnClickListener { listener.invoke() }
+        } else {
+            securityClickable.isClickable = false
+            securityClickable.setOnClickListener(null)
+        }
     }
 
 }

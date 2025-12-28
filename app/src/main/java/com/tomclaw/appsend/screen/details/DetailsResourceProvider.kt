@@ -53,6 +53,40 @@ interface DetailsResourceProvider {
 
     fun translationError(): String
 
+    fun requestScanAction(): String
+
+    fun retryScanAction(): String
+
+    fun securityNotScannedText(): String
+
+    fun securityPendingText(): String
+
+    fun securityScanningText(): String
+
+    fun securitySafeText(): String
+
+    fun securitySuspiciousText(): String
+
+    fun securityMalwareText(): String
+
+    fun securityUnknownText(): String
+
+    fun securityFailedText(): String
+
+    fun securityScanRequestedText(): String
+
+    fun securityScanErrorText(): String
+
+    fun securityWarningMalwareTitle(): String
+
+    fun securityWarningMalwareMessage(): String
+
+    fun securityWarningSuspiciousTitle(): String
+
+    fun securityWarningSuspiciousMessage(): String
+
+    fun securityWarningDownloadAnyway(): String
+
 }
 
 class DetailsResourceProviderImpl(
@@ -149,6 +183,74 @@ class DetailsResourceProviderImpl(
 
     override fun translationError(): String {
         return resources.getString(R.string.translation_error)
+    }
+
+    override fun requestScanAction(): String {
+        return resources.getString(R.string.request_security_scan)
+    }
+
+    override fun retryScanAction(): String {
+        return resources.getString(R.string.retry_security_scan)
+    }
+
+    override fun securityNotScannedText(): String {
+        return resources.getString(R.string.security_not_scanned)
+    }
+
+    override fun securityPendingText(): String {
+        return resources.getString(R.string.security_pending)
+    }
+
+    override fun securityScanningText(): String {
+        return resources.getString(R.string.security_scanning)
+    }
+
+    override fun securitySafeText(): String {
+        return resources.getString(R.string.security_safe)
+    }
+
+    override fun securitySuspiciousText(): String {
+        return resources.getString(R.string.security_suspicious)
+    }
+
+    override fun securityMalwareText(): String {
+        return resources.getString(R.string.security_malware)
+    }
+
+    override fun securityUnknownText(): String {
+        return resources.getString(R.string.security_unknown)
+    }
+
+    override fun securityFailedText(): String {
+        return resources.getString(R.string.security_failed)
+    }
+
+    override fun securityScanRequestedText(): String {
+        return resources.getString(R.string.security_scan_requested)
+    }
+
+    override fun securityScanErrorText(): String {
+        return resources.getString(R.string.security_scan_error)
+    }
+
+    override fun securityWarningMalwareTitle(): String {
+        return resources.getString(R.string.security_warning_malware_title)
+    }
+
+    override fun securityWarningMalwareMessage(): String {
+        return resources.getString(R.string.security_warning_malware_message)
+    }
+
+    override fun securityWarningSuspiciousTitle(): String {
+        return resources.getString(R.string.security_warning_suspicious_title)
+    }
+
+    override fun securityWarningSuspiciousMessage(): String {
+        return resources.getString(R.string.security_warning_suspicious_message)
+    }
+
+    override fun securityWarningDownloadAnyway(): String {
+        return resources.getString(R.string.security_warning_download_anyway)
     }
 
 }

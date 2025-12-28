@@ -5,7 +5,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.tomclaw.appsend.Appteka
 import com.tomclaw.appsend.R
@@ -40,12 +39,6 @@ class AboutActivity : AppCompatActivity(), AboutPresenter.AboutRouter {
         if (savedInstanceState == null) {
             analytics.trackEvent("open-about-screen")
         }
-
-        onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                presenter.onBackPressed()
-            }
-        })
     }
 
     override fun onStart() {
@@ -81,9 +74,9 @@ class AboutActivity : AppCompatActivity(), AboutPresenter.AboutRouter {
         analytics.trackEvent("click-email-feedback")
     }
 
-    override fun openForumDiscussLink() {
-        openUrl(url = getString(R.string.forum_url))
-        analytics.trackEvent("click-4pda-forum")
+    override fun openSourceCodeLink() {
+        openUrl(url = "https://github.com/solkin/appteka-android")
+        analytics.trackEvent("click-source-code")
     }
 
     override fun openTelegramGroupLink() {
@@ -94,6 +87,11 @@ class AboutActivity : AppCompatActivity(), AboutPresenter.AboutRouter {
     override fun openLegalInfoLink() {
         openUrl(url = getString(R.string.legal_info_url))
         analytics.trackEvent("click-legal-info")
+    }
+
+    override fun openContributorLink(url: String) {
+        openUrl(url = url)
+        analytics.trackEvent("click-contributor")
     }
 
     override fun leaveScreen() {

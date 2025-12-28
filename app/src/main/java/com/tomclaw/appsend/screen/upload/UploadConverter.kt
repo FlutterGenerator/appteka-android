@@ -11,6 +11,7 @@ import com.tomclaw.appsend.screen.upload.adapter.notice.NoticeType
 import com.tomclaw.appsend.screen.upload.adapter.open_source.OpenSourceItem
 import com.tomclaw.appsend.screen.upload.adapter.other_versions.OtherVersionsItem
 import com.tomclaw.appsend.screen.upload.adapter.other_versions.VersionItem
+import com.tomclaw.appsend.screen.upload.adapter.prefill_version.PrefillVersionItem
 import com.tomclaw.appsend.screen.upload.adapter.screen_append.ScreenAppendItem
 import com.tomclaw.appsend.screen.upload.adapter.screen_image.ScreenImageItem
 import com.tomclaw.appsend.screen.upload.adapter.screenshots.ScreenshotsItem
@@ -38,12 +39,14 @@ interface UploadConverter {
         openSource: Boolean,
         sourceUrl: String,
         highlightErrors: Boolean,
+        selectedPrefillVersion: VersionItem?,
     ): List<Item>
 
 }
 
 class UploadConverterImpl(
-    private val resourceProvider: UploadResourceProvider
+    private val resourceProvider: UploadResourceProvider,
+    private val descriptionValidator: DescriptionValidator
 ) : UploadConverter {
 
     override fun convert(
@@ -58,6 +61,7 @@ class UploadConverterImpl(
         openSource: Boolean,
         sourceUrl: String,
         highlightErrors: Boolean,
+        selectedPrefillVersion: VersionItem?,
     ): List<Item> {
         var id: Long = 1
         val items = ArrayList<Item>()
@@ -70,6 +74,7 @@ class UploadConverterImpl(
         }
 
         var isUploadAvailable = true
+        var versions: List<VersionItem> = emptyList()
 
         checkExist?.let {
             val clickable = checkExist.file != null
@@ -87,7 +92,7 @@ class UploadConverterImpl(
             checkExist.versions
                 ?.takeIf { it.isNotEmpty() }
                 ?.run {
-                    val versions = this
+                    versions = this
                         .sortedBy { it.verCode }
                         .reversed()
                         .map { version ->
@@ -105,6 +110,15 @@ class UploadConverterImpl(
         }
 
         if (isUploadAvailable) {
+            // Show prefill version selector only for new uploads (not edit mode) with available versions
+            if (!isEditMode && versions.isNotEmpty()) {
+                items += PrefillVersionItem(
+                    id = id++,
+                    versions = versions,
+                    selectedVersion = selectedPrefillVersion
+                )
+            }
+
             items += ScreenshotsItem(
                 id = id++,
                 items = screenshots.map {
@@ -124,10 +138,13 @@ class UploadConverterImpl(
                 errorRequiredField = highlightErrors && category == null
             )
             items += WhatsNewItem(id++, text = whatsNew)
+            val descriptionBlank = description.isBlank()
+            val descriptionTooShort = !descriptionBlank && !descriptionValidator.isValid(description)
             items += DescriptionItem(
                 id++,
                 text = description,
-                errorRequiredField = highlightErrors && description.isBlank()
+                errorRequiredField = highlightErrors && descriptionBlank,
+                errorMinLength = highlightErrors && descriptionTooShort
             )
             items += ExclusiveItem(id++, value = exclusive)
             items += OpenSourceItem(id++, value = openSource, url = sourceUrl)

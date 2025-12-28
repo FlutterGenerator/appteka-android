@@ -15,6 +15,7 @@ import com.tomclaw.appsend.categories.CategoriesInteractor
 import com.tomclaw.appsend.categories.CategoriesInteractorImpl
 import com.tomclaw.appsend.core.AppInfoProvider
 import com.tomclaw.appsend.core.AppInfoProviderImpl
+import com.tomclaw.appsend.core.AppInfoInterceptor
 import com.tomclaw.appsend.core.DeviceIdInterceptor
 import com.tomclaw.appsend.core.DeviceIdProvider
 import com.tomclaw.appsend.core.DeviceIdProviderImpl
@@ -46,6 +47,8 @@ import com.tomclaw.appsend.upload.UploadManager
 import com.tomclaw.appsend.upload.UploadManagerImpl
 import com.tomclaw.appsend.upload.UploadNotifications
 import com.tomclaw.appsend.upload.UploadNotificationsImpl
+import com.tomclaw.appsend.user.ModerationProvider
+import com.tomclaw.appsend.user.ModerationProviderImpl
 import com.tomclaw.appsend.user.SessionStorage
 import com.tomclaw.appsend.user.SessionStorageImpl
 import com.tomclaw.appsend.util.Analytics
@@ -141,8 +144,10 @@ class AppModule(private val app: Application) {
 
     @Provides
     @Singleton
-    internal fun provideAppInfoProvider(packageManager: PackageManager): AppInfoProvider =
-        AppInfoProviderImpl(app, packageManager)
+    internal fun provideAppInfoProvider(
+        packageManager: PackageManager,
+        locale: Locale
+    ): AppInfoProvider = AppInfoProviderImpl(app, packageManager, locale)
 
     @Provides
     @Singleton
@@ -182,6 +187,10 @@ class AppModule(private val app: Application) {
         gson: Gson,
         schedulers: SchedulersFactory
     ): SessionStorage = SessionStorageImpl(app.getDir(USER_DIR, MODE_PRIVATE), gson, schedulers)
+
+    @Provides
+    @Singleton
+    internal fun provideModerationProvider(): ModerationProvider = ModerationProviderImpl()
 
     @Provides
     @Singleton
@@ -247,11 +256,13 @@ class AppModule(private val app: Application) {
         cookieJar: CookieJar,
         userAgentProvider: UserAgentProvider,
         deviceIdProvider: DeviceIdProvider,
+        appInfoProvider: AppInfoProvider,
     ): OkHttpClient = OkHttpClient.Builder()
         .readTimeout(2, TimeUnit.MINUTES)
         .connectTimeout(20, TimeUnit.SECONDS)
         .addInterceptor(UserAgentInterceptor(userAgentProvider.getUserAgent()))
         .addInterceptor(DeviceIdInterceptor(deviceIdProvider.getDeviceId()))
+        .addInterceptor(AppInfoInterceptor(appInfoProvider))
         .addInterceptor(ChuckerInterceptor.Builder(app).build())
         .cookieJar(cookieJar)
         .build()
