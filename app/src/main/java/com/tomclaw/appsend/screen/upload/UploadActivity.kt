@@ -1,15 +1,21 @@
 package com.tomclaw.appsend.screen.upload
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP
+import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.inputmethod.InputMethodManager
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.avito.konveyor.ItemBinder
 import com.avito.konveyor.adapter.AdapterPresenter
 import com.avito.konveyor.adapter.SimpleRecyclerAdapter
@@ -80,6 +86,20 @@ class UploadActivity : AppCompatActivity(), UploadPresenter.UploadRouter {
             result.getUris()?.firstOrNull()?.let { uri ->
                 presenter.onFileSelected(uri)
             }
+        }
+
+    private var pendingUpload: UploadParams? = null
+
+    private val notificationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { _ ->
+            // Start upload regardless of permission result - notifications just won't show
+            // Delay is needed to let the system apply the permission before starting foreground service
+            Handler(Looper.getMainLooper()).postDelayed({
+                pendingUpload?.let { params ->
+                    doStartUpload(params.pkg, params.apk, params.info)
+                }
+                pendingUpload = null
+            }, PERMISSION_APPLY_DELAY)
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -155,10 +175,28 @@ class UploadActivity : AppCompatActivity(), UploadPresenter.UploadRouter {
     }
 
     override fun startUpload(pkg: UploadPackage, apk: UploadApk?, info: UploadInfo) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val permission = Manifest.permission.POST_NOTIFICATIONS
+            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+                pendingUpload = UploadParams(pkg, apk, info)
+                notificationPermissionLauncher.launch(permission)
+                return
+            }
+        }
+        doStartUpload(pkg, apk, info)
+    }
+
+    private fun doStartUpload(pkg: UploadPackage, apk: UploadApk?, info: UploadInfo) {
         val intent = createUploadIntent(context = this, pkg, apk, info)
-        startService(intent)
+        ContextCompat.startForegroundService(this, intent)
         analytics.trackEvent("upload-start")
     }
+
+    private data class UploadParams(
+        val pkg: UploadPackage,
+        val apk: UploadApk?,
+        val info: UploadInfo
+    )
 
     override fun openLoginScreen() {
         val intent = createRequestCodeActivityIntent(context = this)
@@ -249,3 +287,4 @@ private const val EXTRA_PACKAGE_INFO = "pkg_info"
 private const val EXTRA_APK_INFO = "apk_info"
 private const val EXTRA_UPLOAD_INFO = "upload_info"
 private const val KEY_PRESENTER_STATE = "presenter_state"
+private const val PERMISSION_APPLY_DELAY = 100L

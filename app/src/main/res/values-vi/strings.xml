@@ -49,6 +49,10 @@
     <string name="install">Cài đặt</string>
     <string name="install_app">Cài đặt ứng dụng</string>
     <string name="request_delete_packages">Phải được cấp quyền để xóa ứng dụng</string>
+    <string name="write_permission_download">Cần cấp quyền lưu trữ để tải ứng dụng</string>
+    <string name="write_permission_share">Cần cấp quyền lưu trữ để chia sẻ ứng dụng</string>
+    <string name="write_permission_clear_cache">Cần cấp quyền lưu trữ để xóa bộ nhớ đệm</string>
+    <string name="write_permission_view_downloads">Cần cấp quyền lưu trữ để xem tải xuống</string>
     <string name="pref_title_theme">Chủ đề</string>
     <string name="pref_summary_theme">Chọn chủ đề ứng dụng</string>
     <string name="pref_title_dynamic_colors">Màu động</string>
@@ -372,4 +376,16 @@
     <string name="prefill_from_version">Điền từ phiên bản</string>
     <string name="prefill_none">Không điền</string>
     <string name="prefill_hint">Sao chép mô tả, ảnh chụp màn hình và cài đặt từ phiên bản trước</string>
+    <string name="change_email_title">Thay đổi Email</string>
+    <string name="change_email_description">Nhập địa chỉ email mới của bạn. Chúng tôi sẽ gửi mã xác minh để xác nhận thay đổi.</string>
+    <string name="new_email_hint">Địa chỉ email mới</string>
+    <string name="send_code_button">Gửi mã</string>
+    <string name="verification_code_hint">Mã xác minh</string>
+    <string name="confirm_email_change_button">Xác nhận thay đổi</string>
+    <string name="code_sent_to_email">Mã xác minh đã được gửi đến %s</string>
+    <string name="invalid_email_format">Vui lòng nhập địa chỉ email hợp lệ</string>
+    <string name="invalid_code_format">Mã xác minh không hợp lệ</string>
+    <string name="email_already_taken">Email này đã được sử dụng bởi tài khoản khác</string>
+    <string name="error_changing_email">Không thể thay đổi email</string>
+    <string name="email_changed_success">Thay đổi email thành công</string>
 </resources>
