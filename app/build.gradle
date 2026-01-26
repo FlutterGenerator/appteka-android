@@ -1,6 +1,5 @@
 plugins {
     id 'com.android.application'
-    id 'kotlin-kapt'
     id 'kotlin-parcelize'
 }
 
@@ -61,10 +60,6 @@ android {
         targetCompatibility JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = '17'
-    }
-
     applicationVariants.all { variant ->
         variant.outputs.all {
             def versionName = variant.versionName
@@ -108,5 +103,9 @@ android {
         releaseImplementation 'com.github.chuckerteam.chucker:library-no-op:4.3.0'
         implementation 'org.androidannotations:androidannotations-api:4.8.0'
         testImplementation 'junit:junit:4.13.2'
+    }
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+    kotlinOptions {
+        jvmTarget = '17'
     }
 }
